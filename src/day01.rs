@@ -13,11 +13,11 @@ pub fn part_1(input: &Data) -> usize {
 }
 
 pub fn part_2(input: &Data) -> usize {
-    let mut temp = input.clone();
-    temp.sort();
-    temp.reverse();
-    temp.truncate(3);
-    temp.iter().sum()
+    let mut input = input.clone();
+    input.sort();
+    input.reverse();
+    input.truncate(3);
+    input.iter().sum()
 }
 
 #[cfg(test)]
