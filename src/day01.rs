@@ -1,22 +1,15 @@
 type Data = Vec<usize>;
 
 pub fn parse(input: &str) -> Data {
-    let blocks = input.split("\n\n");
-    let mut out = vec![];
-    for block in blocks {
-        out.push(block.lines().map(|l| l.parse::<usize>().unwrap()).sum());
-    }
-    out
+    input
+        .split("\n\n")
+        .into_iter()
+        .map(|x| x.lines().map(|l| l.parse::<usize>().unwrap()).sum())
+        .collect()
 }
 
 pub fn part_1(input: &Data) -> usize {
-    let mut max = usize::MIN;
-    for block in input {
-        if *block > max {
-            max = *block;
-        }
-    }
-    max
+    *input.iter().max().unwrap()
 }
 
 pub fn part_2(input: &Data) -> usize {

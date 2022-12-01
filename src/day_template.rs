@@ -1,4 +1,4 @@
-type Data = Vec<i32>;
+type Data = Vec<usize>;
 
 pub fn parse(input: &str) -> Data {
     input.lines().map(|l| l.parse().unwrap()).collect()
@@ -23,13 +23,13 @@ mod tests {
     pub fn part_1() {
         let input = super::parse(INPUTS);
         let result = super::part_1(&input);
-        assert_eq!(result, 7);
+        assert_eq!(result, 0);
     }
 
     #[test]
     pub fn part_2() {
         let input = super::parse(INPUTS);
         let result = super::part_2(&input);
-        assert_eq!(result, 7);
+        assert_eq!(result, 0);
     }
 }
