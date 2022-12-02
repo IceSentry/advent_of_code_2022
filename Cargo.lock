@@ -63,7 +63,7 @@ checksum = "216261ddc8289130e551ddcd5ce8a064710c0d064a4d2895c67151c92b5443f6"
 [[package]]
 name = "aoc_helper"
 version = "0.1.0"
-source = "git+https://github.com/IceSentry/aoc_helper.git#97b7880c3c00e37eeb821ed229bf1f05567cee3b"
+source = "git+https://github.com/IceSentry/aoc_helper.git#32723226cc21f0a0b99f560e95d73aaac994b524"
 dependencies = [
  "anyhow",
  "colored",
