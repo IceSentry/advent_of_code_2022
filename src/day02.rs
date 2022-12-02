@@ -31,44 +31,35 @@ pub fn parse(input: &str) -> Data {
 }
 
 pub fn part_1(input: &Data) -> usize {
-    let input: Vec<(Hand, Hand)> = input
+    input
         .iter()
-        .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
-        .collect();
-
-    let mut total = 0;
-    for (opponent, you) in input {
-        total += score_hand(&you) + score_game((opponent, you));
-    }
-    total
+        .map(|(a, b)| (a.parse::<Hand>().unwrap(), b.parse::<Hand>().unwrap()))
+        .map(|(opponent, you)| score_hand(&you) + score_game((opponent, you)))
+        .sum()
 }
 
 pub fn part_2(input: &Data) -> usize {
     use Hand::*;
     use Move::*;
-
-    let input: Vec<(Hand, Move)> = input
+    input
         .iter()
-        .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
-        .collect();
-
-    let mut total = 0;
-    for (opponent, needs_to_end) in input {
-        let you = match (needs_to_end, opponent) {
-            // lose
-            (Lose, Rock) => Scissors,
-            (Lose, Paper) => Rock,
-            (Lose, Scissors) => Paper,
-            // win
-            (Win, Rock) => Paper,
-            (Win, Paper) => Scissors,
-            (Win, Scissors) => Rock,
-            // draw
-            (Draw, _) => opponent,
-        };
-        total += score_hand(&you) + score_game((opponent, you));
-    }
-    total
+        .map(|(a, b)| (a.parse::<Hand>().unwrap(), b.parse::<Move>().unwrap()))
+        .map(|(opponent, end_move)| {
+            let you = match (end_move, opponent) {
+                // lose
+                (Lose, Rock) => Scissors,
+                (Lose, Paper) => Rock,
+                (Lose, Scissors) => Paper,
+                // win
+                (Win, Rock) => Paper,
+                (Win, Paper) => Scissors,
+                (Win, Scissors) => Rock,
+                // draw
+                (Draw, _) => opponent,
+            };
+            score_hand(&you) + score_game((opponent, you))
+        })
+        .sum()
 }
 
 fn score_hand(hand: &Hand) -> usize {
