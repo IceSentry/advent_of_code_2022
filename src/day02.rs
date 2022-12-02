@@ -1,7 +1,27 @@
-use hashbrown::HashMap;
 use serde_scan::scan;
+use strum::EnumString;
 
-type Data = Vec<(char, char)>;
+type Data = Vec<(String, String)>;
+
+#[derive(Debug, PartialEq, EnumString, Copy, Clone)]
+enum Hand {
+    #[strum(serialize = "A", serialize = "X")]
+    Rock,
+    #[strum(serialize = "B", serialize = "Y")]
+    Paper,
+    #[strum(serialize = "C", serialize = "Z")]
+    Scissors,
+}
+
+#[derive(Debug, PartialEq, EnumString, Copy, Clone)]
+enum Move {
+    #[strum(serialize = "X")]
+    Lose,
+    #[strum(serialize = "Y")]
+    Draw,
+    #[strum(serialize = "Z")]
+    Win,
+}
 
 pub fn parse(input: &str) -> Data {
     input
@@ -11,55 +31,64 @@ pub fn parse(input: &str) -> Data {
 }
 
 pub fn part_1(input: &Data) -> usize {
-    let mut scores = HashMap::new();
-    scores.insert('X', 1);
-    scores.insert('Y', 2);
-    scores.insert('Z', 3);
+    let input: Vec<(Hand, Hand)> = input
+        .iter()
+        .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
+        .collect();
 
     let mut total = 0;
     for (opponent, you) in input {
-        let game_score = match (opponent, you) {
-            ('A', 'Y') | ('B', 'Z') | ('C', 'X') => 6, // win
-            ('A', 'X') | ('B', 'Y') | ('C', 'Z') => 3, // draw
-            _ => 0,                                    // loss
-        };
-        total += scores[you] + game_score;
+        total += score_hand(&you) + score_game((opponent, you));
     }
     total
 }
 
-// X -> lose
-// Y -> draw
-// Z -> win
 pub fn part_2(input: &Data) -> usize {
-    let mut scores = HashMap::new();
-    scores.insert('A', 1);
-    scores.insert('B', 2);
-    scores.insert('C', 3);
+    use Hand::*;
+    use Move::*;
+
+    let input: Vec<(Hand, Move)> = input
+        .iter()
+        .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
+        .collect();
+
     let mut total = 0;
     for (opponent, needs_to_end) in input {
         let you = match (needs_to_end, opponent) {
             // lose
-            ('X', 'A') => 'C',
-            ('X', 'B') => 'A',
-            ('X', 'C') => 'B',
+            (Lose, Rock) => Scissors,
+            (Lose, Paper) => Rock,
+            (Lose, Scissors) => Paper,
             // win
-            ('Z', 'A') => 'B',
-            ('Z', 'B') => 'C',
-            ('Z', 'C') => 'A',
+            (Win, Rock) => Paper,
+            (Win, Paper) => Scissors,
+            (Win, Scissors) => Rock,
             // draw
-            ('Y', _) => *opponent,
-            _ => unreachable!(),
+            (Draw, _) => opponent,
         };
-
-        let game_score = match (opponent, you) {
-            ('A', 'B') | ('B', 'C') | ('C', 'A') => 6, // win
-            ('A', 'A') | ('B', 'B') | ('C', 'C') => 3, // draw
-            _ => 0,                                    // loss
-        };
-        total += scores[&you] + game_score;
+        total += score_hand(&you) + score_game((opponent, you));
     }
     total
+}
+
+fn score_hand(hand: &Hand) -> usize {
+    match hand {
+        Hand::Rock => 1,
+        Hand::Paper => 2,
+        Hand::Scissors => 3,
+    }
+}
+
+fn score_game((opponent, you): (Hand, Hand)) -> usize {
+    use Hand::*;
+    match (opponent, you) {
+        // win
+        (Rock, Paper) | (Paper, Scissors) | (Scissors, Rock) => 6,
+        // draw
+        (Rock, Rock) | (Paper, Paper) | (Scissors, Scissors) => 3,
+        // lose
+        _ => 0,
+    }
 }
 
 #[cfg(test)]
