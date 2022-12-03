@@ -13,6 +13,16 @@ enum Hand {
     Scissors,
 }
 
+impl Hand {
+    fn score(&self) -> usize {
+        match self {
+            Hand::Rock => 1,
+            Hand::Paper => 2,
+            Hand::Scissors => 3,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, EnumString, Copy, Clone)]
 enum Move {
     #[strum(serialize = "X")]
@@ -34,7 +44,7 @@ pub fn part_1(input: &Data) -> usize {
     input
         .iter()
         .map(|(a, b)| (a.parse::<Hand>().unwrap(), b.parse::<Hand>().unwrap()))
-        .map(|(opponent, you)| score_hand(&you) + score_game((opponent, you)))
+        .map(|(opponent, you)| you.score() + score_game((opponent, you)))
         .sum()
 }
 
@@ -45,29 +55,18 @@ pub fn part_2(input: &Data) -> usize {
         .iter()
         .map(|(a, b)| (a.parse::<Hand>().unwrap(), b.parse::<Move>().unwrap()))
         .map(|(opponent, end_move)| {
-            let you = match (end_move, opponent) {
-                // lose
-                (Lose, Rock) => Scissors,
-                (Lose, Paper) => Rock,
-                (Lose, Scissors) => Paper,
-                // win
-                (Win, Rock) => Paper,
-                (Win, Paper) => Scissors,
-                (Win, Scissors) => Rock,
-                // draw
-                (Draw, _) => opponent,
+            let you = match (opponent, end_move) {
+                (Rock, Lose) => Scissors,
+                (Rock, Win) => Paper,
+                (Paper, Lose) => Rock,
+                (Paper, Win) => Scissors,
+                (Scissors, Lose) => Paper,
+                (Scissors, Win) => Rock,
+                (_, Draw) => opponent,
             };
-            score_hand(&you) + score_game((opponent, you))
+            you.score() + score_game((opponent, you))
         })
         .sum()
-}
-
-fn score_hand(hand: &Hand) -> usize {
-    match hand {
-        Hand::Rock => 1,
-        Hand::Paper => 2,
-        Hand::Scissors => 3,
-    }
 }
 
 fn score_game((opponent, you): (Hand, Hand)) -> usize {
