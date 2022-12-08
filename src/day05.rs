@@ -5,29 +5,21 @@ type Data = (Vec<Vec<char>>, Vec<(usize, usize, usize)>);
 pub fn parse(input: &str) -> Data {
     let inputs = input.split("\n\n").collect::<Vec<_>>();
 
-    let drawing = inputs[0].lines().rev().collect::<Vec<_>>();
-    let mut stacks: Vec<Vec<char>> = vec![];
+    let drawing = inputs[0]
+        .lines()
+        .rev()
+        .map(|l| l.chars().collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+    let mut stacks = vec![];
     for line in drawing.iter().skip(1) {
-        let mut i = 0;
-        let mut chars = line.chars().peekable();
-        loop {
-            // skip [ or space
-            if chars.next().is_none() {
-                break;
-            }
-            let crate_name = chars.next().unwrap();
-            // skip ]
-            chars.next();
-            // skip space between
-            chars.next();
-
+        for (i, chunk) in line.chunks(4).enumerate() {
+            let crate_name = chunk[1];
             if crate_name.is_alphabetic() {
                 if stacks.get(i).is_none() {
                     stacks.push(vec![]);
                 }
                 stacks[i].push(crate_name);
             }
-            i += 1;
         }
     }
 
@@ -39,14 +31,13 @@ pub fn parse(input: &str) -> Data {
     (stacks, procedures)
 }
 
-pub fn part_1(input: &Data) -> String {
-    let mut stacks = input.0.clone();
-    let procedures = input.1.clone();
+pub fn part_1((stacks, procedures): &Data) -> String {
+    let mut stacks = stacks.clone();
     for (a, b, c) in procedures {
-        for _ in 0..a {
-            let val = stacks[b - 1].pop().unwrap();
-            stacks[c - 1].push(val);
-        }
+        let stack = (0..*a)
+            .flat_map(|_| stacks[b - 1].pop())
+            .collect::<Vec<_>>();
+        stacks[c - 1].extend(stack);
     }
     stacks
         .iter()
@@ -54,17 +45,14 @@ pub fn part_1(input: &Data) -> String {
         .collect::<String>()
 }
 
-pub fn part_2(input: &Data) -> String {
-    let mut stacks = input.0.clone();
-    let procedures = input.1.clone();
+pub fn part_2((stacks, procedures): &Data) -> String {
+    let mut stacks = stacks.clone();
     for (a, b, c) in procedures {
-        let mut temp = vec![];
-        for _ in 0..a {
-            let val = stacks[b - 1].pop().unwrap();
-            temp.push(val);
-        }
-        temp.reverse();
-        stacks[c - 1].extend(temp);
+        let mut stack = (0..*a)
+            .flat_map(|_| stacks[b - 1].pop())
+            .collect::<Vec<_>>();
+        stack.reverse();
+        stacks[c - 1].extend(stack);
     }
     stacks
         .iter()
@@ -92,7 +80,6 @@ mod tests {
     #[test]
     pub fn part_1() {
         let input = super::parse(INPUTS);
-        println!("{input:?}");
         let result = super::part_1(&input);
         assert_eq!(result, "CMZ");
     }
