@@ -85,7 +85,7 @@ fn dir_size(fs: &HashMap<Vec<String>, FsEntry>, entry: &Vec<String>) -> usize {
         dir_entry.push(dir.clone());
         total += dir_size(fs, &dir_entry);
     }
-    total += entry_data.files.iter().map(|f| f.size).sum::<usize>();
+    total += entry_data.files.iter().fold(0, |acc, f| acc + f.size);
     total
 }
 
