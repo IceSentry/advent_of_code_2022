@@ -55,26 +55,18 @@ fn check_vis(
     dir: (i32, i32),
 ) -> bool {
     let curr_tree = input[y][x];
-    let mut x = x as i32;
-    let mut y = y as i32;
-    let mut visible = true;
+    let (mut x, mut y) = (x as i32, y as i32);
     loop {
         x += dir.0;
         y += dir.1;
-
-        if x == -1 || x >= *width as i32 {
+        if x == -1 || x >= *width as i32 || y == -1 || y >= *height as i32 {
             break;
         }
-        if y == -1 || y >= *height as i32 {
-            break;
-        }
-
         if input[y as usize][x as usize] >= curr_tree {
-            visible = false;
-            break;
+            return false;
         }
     }
-    visible
+    true
 }
 
 fn scenic_score(
@@ -84,27 +76,16 @@ fn scenic_score(
     dir: (i32, i32),
 ) -> usize {
     let curr_tree = input[y][x];
-    let mut x = x as i32;
-    let mut y = y as i32;
+    let (mut x, mut y) = (x as i32, y as i32);
     let mut score = 0;
     loop {
         x += dir.0;
         y += dir.1;
-
-        if x == -1 || x >= *width as i32 {
+        if x == -1 || x >= *width as i32 || y == -1 || y >= *height as i32 {
             break;
         }
-        if y == -1 || y >= *height as i32 {
-            break;
-        }
-
-        let check = input[y as usize][x as usize];
-        if check < curr_tree {
-            score += 1;
-        }
-
-        if check >= curr_tree {
-            score += 1;
+        score += 1;
+        if input[y as usize][x as usize] >= curr_tree {
             break;
         }
     }
