@@ -1,4 +1,4 @@
-type Data = Vec<Vec<usize>>;
+type Data = Vec<Vec<u32>>;
 
 pub fn parse(input: &str) -> Data {
     input
@@ -7,7 +7,7 @@ pub fn parse(input: &str) -> Data {
             l.parse::<String>()
                 .unwrap()
                 .chars()
-                .map(|c| c as usize - 48)
+                .map(|c| c.to_digit(10).unwrap())
                 .collect()
         })
         .collect()
