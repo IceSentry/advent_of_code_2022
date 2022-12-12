@@ -12,61 +12,72 @@ pub fn parse(input: &str) -> Data {
         .collect()
 }
 
-pub fn part_1(input: &Data) -> usize {
-    let mut cycle_count = 0;
-    let mut signal_strength = 0;
-    let mut x = 1;
-    for (instruction, value) in input {
-        cycle(&mut cycle_count, &mut signal_strength, x);
-        match instruction.as_str() {
-            "noop" => {}
-            "addx" => {
-                cycle(&mut cycle_count, &mut signal_strength, x);
-                x += value.parse::<i32>().unwrap();
-            }
-            _ => unreachable!(),
+struct Cpu {
+    cycle_count: usize,
+    register_x: i32,
+    signal_strength: usize,
+    draw: bool,
+}
+
+impl Cpu {
+    fn new(draw: bool) -> Self {
+        Self {
+            cycle_count: 0,
+            register_x: 1,
+            signal_strength: 0,
+            draw,
         }
     }
-    signal_strength
+
+    fn run(&mut self, input: &Data) {
+        for (instruction, value) in input {
+            self.cycle();
+            match instruction.as_str() {
+                "noop" => {}
+                "addx" => {
+                    self.cycle();
+                    self.register_x += value.parse::<i32>().unwrap();
+                }
+                _ => unreachable!(),
+            }
+        }
+    }
+
+    fn cycle(&mut self) {
+        self.draw();
+
+        self.cycle_count += 1;
+        if self.cycle_count == 20 || (self.cycle_count + 20) % 40 == 0 {
+            self.signal_strength += self.cycle_count * self.register_x as usize;
+        }
+    }
+
+    fn draw(&mut self) {
+        if !self.draw {
+            return;
+        }
+        if self.cycle_count % 40 == 0 {
+            println!();
+        }
+        if (self.register_x - self.cycle_count as i32 % 40).abs() <= 1 {
+            print!("#");
+        } else {
+            print!(" ");
+        }
+    }
+}
+
+pub fn part_1(input: &Data) -> usize {
+    let mut cpu = Cpu::new(false);
+    cpu.run(input);
+    cpu.signal_strength
 }
 
 pub fn part_2(input: &Data) -> usize {
-    let mut cycle_count = 0;
-    let mut signal_strength = 0;
-    let mut x = 1;
-    for (instruction, value) in input {
-        draw(cycle_count, x);
-        cycle(&mut cycle_count, &mut signal_strength, x);
-        match instruction.as_str() {
-            "noop" => {}
-            "addx" => {
-                draw(cycle_count, x);
-                cycle(&mut cycle_count, &mut signal_strength, x);
-                x += value.parse::<i32>().unwrap();
-            }
-            _ => unreachable!(),
-        }
-    }
+    let mut cpu = Cpu::new(true);
+    cpu.run(input);
     println!();
     0
-}
-
-fn draw(cycle: usize, x: i32) {
-    if cycle % 40 == 0 {
-        println!();
-    }
-    if (x - cycle as i32 % 40).abs() <= 1 {
-        print!("#");
-    } else {
-        print!(" ");
-    }
-}
-
-fn cycle(cycle: &mut usize, signal_strength: &mut usize, register_x: i32) {
-    *cycle += 1;
-    if *cycle == 20 || (*cycle + 20) % 40 == 0 {
-        *signal_strength += *cycle * register_x as usize;
-    }
 }
 
 #[cfg(test)]
