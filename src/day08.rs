@@ -3,13 +3,7 @@ type Data = Vec<Vec<u32>>;
 pub fn parse(input: &str) -> Data {
     input
         .lines()
-        .map(|l| {
-            l.parse::<String>()
-                .unwrap()
-                .chars()
-                .map(|c| c.to_digit(10).unwrap())
-                .collect()
-        })
+        .map(|l| l.chars().map(|c| c.to_digit(10).unwrap()).collect())
         .collect()
 }
 
