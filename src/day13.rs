@@ -17,6 +17,7 @@ pub enum Packet {
     Int(i32),
 }
 
+#[allow(unused)]
 fn packet_string(packet: &Packet) -> String {
     let mut s = String::from("");
     match packet {
@@ -65,16 +66,6 @@ fn parse_packet(raw_packet: &mut VecDeque<char>) -> Vec<Packet> {
     list
 }
 
-pub fn part_1(input: &Data) -> usize {
-    let mut sum = 0;
-    for (i, (left, right)) in input.iter().enumerate() {
-        if let std::cmp::Ordering::Less = compare(left, right) {
-            sum += i + 1;
-        }
-    }
-    sum
-}
-
 fn compare(left: &Packet, right: &Packet) -> std::cmp::Ordering {
     use std::cmp::Ordering::*;
     use Packet::*;
@@ -83,17 +74,26 @@ fn compare(left: &Packet, right: &Packet) -> std::cmp::Ordering {
         (List(l), List(r)) => {
             let mut i = 0;
             while i < l.len() && i < r.len() {
-                let cmp = compare(&l[i], &r[i]);
-                if matches!(cmp, Less | Greater) {
-                    return cmp;
+                match compare(&l[i], &r[i]) {
+                    cmp @ (Less | Greater) => return cmp,
+                    Equal => i += 1,
                 }
-                i += 1;
             }
             l.len().cmp(&r.len())
         }
         (list, Int(int)) => compare(list, &List(vec![Int(*int)])),
         (Int(int), list) => compare(&List(vec![Int(*int)]), list),
     }
+}
+
+pub fn part_1(input: &Data) -> usize {
+    let mut sum = 0;
+    for (i, (left, right)) in input.iter().enumerate() {
+        if let std::cmp::Ordering::Less = compare(left, right) {
+            sum += i + 1;
+        }
+    }
+    sum
 }
 
 pub fn part_2(input: &Data) -> usize {
@@ -121,8 +121,6 @@ pub fn part_2(input: &Data) -> usize {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
-
-    use super::packet_string;
 
     const INPUTS: &str = indoc! {"
         [1,1,3,1,1]
@@ -162,20 +160,5 @@ mod tests {
         let input = super::parse(INPUTS);
         let result = super::part_2(&input);
         assert_eq!(result, 140);
-    }
-
-    #[test]
-    pub fn test_parse() {
-        const INPUTS: &str = indoc! {"
-            [[1],[2,3,4]]
-            [[1],4]
-        "};
-        let input = super::parse(INPUTS);
-        for (left, right) in input {
-            println!("{:?}", left);
-            println!("{}", packet_string(&left));
-            println!("{:?}", right);
-            println!("{}", packet_string(&right));
-        }
     }
 }
